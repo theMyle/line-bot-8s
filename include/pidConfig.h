@@ -1,26 +1,21 @@
 #ifndef PID_CONFIG_H
 #define PID_CONFIG_H
 
+/**
+ * @brief PID configuration and motor speed settings for line following.
+ *
+ * This struct holds the PID constants and motor speed parameters
+ * used by the line tracing algorithm.
+ */
 struct PID_CONFIG
 {
-    float Kp;
-    float Ki;
-    float Kd;
-    uint8_t MAX_SPD;
-    uint8_t BASE_SPD;
-    uint8_t TURN_SPD;
-    uint16_t CENTER_POS;
-};
-
-// PID config
-const PID_CONFIG PID{
-    0.08f, // Kp
-    0.0f,  // Ki
-    0.2f,  // Kd
-    150,   // max
-    120,   // base
-    80,    // turn
-    2500,  // center
+    float Kp;            ///< Proportional gain constant
+    float Ki;            ///< Integral gain constant
+    float Kd;            ///< Derivative gain constant
+    uint8_t MAX_SPD;     ///< Maximum motor speed
+    uint8_t BASE_SPD;    ///< Base motor speed (normal forward speed)
+    uint8_t TURN_SPD;    ///< Speed used when turning
+    uint16_t CENTER_POS; ///< Center position value for sensor readings
 };
 
 #endif
