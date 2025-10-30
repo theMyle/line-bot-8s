@@ -5,7 +5,7 @@
 
 // creates a MotorPins struct with given PWM, direction pins, and offset
 MotorPins createMotor(
-    uint8_t PWM_PIN, uint8_t DIR1_PIN, uint8_t DIR2_PIN, uint8_t OFFSET)
+    uint8_t PWM_PIN, uint8_t DIR1_PIN, uint8_t DIR2_PIN, int8_t OFFSET)
 {
     return {PWM_PIN, DIR1_PIN, DIR2_PIN, OFFSET};
 };

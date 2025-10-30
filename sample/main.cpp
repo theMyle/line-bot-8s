@@ -194,6 +194,7 @@ void calibrateSensors()
   int totalSteps = 150;
   int halfSteps = totalSteps / 2;
   int spinSpeed = 100;
+
   for (int i = 0; i < totalSteps; i++)
   {
     if (i < halfSteps)
