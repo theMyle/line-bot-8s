@@ -11,21 +11,21 @@ MotorPins createMotor(
 };
 
 // initializes motor pins and enables the driver
-void initMotors(const MotorPins &MOTOR_A, const MotorPins &MOTOR_B, const uint8_t STBY)
+void initMotors(const MotorController &motors)
 {
-    pinMode(MOTOR_A.PIN_PWM, OUTPUT);
-    pinMode(MOTOR_A.PIN_DIR1, OUTPUT);
-    pinMode(MOTOR_A.PIN_DIR2, OUTPUT);
+    pinMode(motors.LEFT_MOTOR.PIN_PWM, OUTPUT);
+    pinMode(motors.LEFT_MOTOR.PIN_DIR1, OUTPUT);
+    pinMode(motors.LEFT_MOTOR.PIN_DIR2, OUTPUT);
 
-    pinMode(MOTOR_B.PIN_PWM, OUTPUT);
-    pinMode(MOTOR_B.PIN_DIR1, OUTPUT);
-    pinMode(MOTOR_B.PIN_DIR2, OUTPUT);
+    pinMode(motors.RIGHT_MOTOR.PIN_PWM, OUTPUT);
+    pinMode(motors.RIGHT_MOTOR.PIN_DIR1, OUTPUT);
+    pinMode(motors.RIGHT_MOTOR.PIN_DIR2, OUTPUT);
 
-    pinMode(STBY, OUTPUT);
-    digitalWrite(STBY, HIGH);
+    pinMode(motors.PIN_STBY, OUTPUT);
+    digitalWrite(motors.PIN_STBY, HIGH);
 }
 
-// movements
+// single motor movements
 void motorForward(const MotorPins &motor, const uint8_t speed)
 {
     digitalWrite(motor.PIN_DIR1, motor.OFFSET > 0 ? HIGH : LOW);
@@ -59,16 +59,40 @@ void motorResume(const uint8_t STBY)
     digitalWrite(STBY, HIGH);
 }
 
-void motorSpinInPlace(const MotorPins &motorA, const MotorPins &motorB, const uint8_t speed, bool reverse = false)
+// motor pair movements
+
+// drive both wheels forward
+void driveForward(const MotorController &motors, const uint8_t speed)
+{
+    motorForward(motors.LEFT_MOTOR, speed);
+    motorForward(motors.RIGHT_MOTOR, speed);
+};
+
+// drive both wheels backward
+void driveBackward(const MotorController &motors, const uint8_t speed)
+{
+    motorBackward(motors.LEFT_MOTOR, speed);
+    motorBackward(motors.RIGHT_MOTOR, speed);
+};
+
+// drive both wheels the opposite direction
+void motorSpinInPlace(const MotorController &motors, const uint8_t speed, bool reverse = false)
 {
     if (!reverse)
     {
-        motorForward(motorA, speed);
-        motorBackward(motorB, speed);
+        motorForward(motors.LEFT_MOTOR, speed);
+        motorBackward(motors.RIGHT_MOTOR, speed);
     }
     else
     {
-        motorForward(motorB, speed);
-        motorBackward(motorA, speed);
+        motorForward(motors.RIGHT_MOTOR, speed);
+        motorBackward(motors.LEFT_MOTOR, speed);
     }
 }
+
+// stop both motors
+void stopMotors(const MotorController &motors)
+{
+    motorStop(motors.LEFT_MOTOR);
+    motorStop(motors.RIGHT_MOTOR);
+};

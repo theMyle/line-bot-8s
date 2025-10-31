@@ -11,17 +11,20 @@
 QTRSensors qtr;
 uint16_t sensorValues[SENSOR_COUNT];
 
-MotorPins MOTOR_A = createMotor(PIN_PWM_A, PIN_DIR_AIN1, PIN_DIR_AIN2, -1); // right motor
-MotorPins MOTOR_B = createMotor(PIN_PWM_B, PIN_DIR_BIN1, PIN_DIR_BIN2, 1);  // left motor
+const MotorController motorController{
+    .LEFT_MOTOR = createMotor(PIN_PWM_B, PIN_DIR_BIN1, PIN_DIR_BIN2, 1),
+    .RIGHT_MOTOR = createMotor(PIN_PWM_A, PIN_DIR_AIN1, PIN_DIR_AIN2, -1),
+    .PIN_STBY = STBY,
+};
 
-PID_CONFIG PID{
-    10.0f, // Kp
-    0.0f,  // Ki
-    0.0f,  // Kd
-    150,   // max
-    70,    // base
-    0,     // turn
-    0,     // center
+const PID_CONFIG PID{
+    .Kp = 10.0f,
+    .Ki = 0.0f,
+    .Kd = 0.0f,
+    .MAX_SPD = 150,
+    .BASE_SPD = 70,
+    .TURN_SPD = 0,
+    .CENTER_POS = 0,
 };
 
 // setup things
@@ -34,32 +37,28 @@ void setup()
     qtr.setSensorPins(SENSOR_PINS, SENSOR_COUNT);
     qtr.releaseEmitterPins();
 
-    initMotors(MOTOR_A, MOTOR_B, STBY);
-
-    // calibrateSensors(qtr);
-    calibrateSensorsFull(qtr, 400, 5, MOTOR_A, MOTOR_B, 80);
+    initMotors(motorController);
+    calibrateSensorsFull(qtr, 400, 5, motorController, 80);
 }
 
-unsigned long lastTime = 0;
 unsigned long now = 0;
+unsigned long lastTime = 0;
 float lastError = 0;
-float dt = 0;
 
-float position;
+float leftMotorFloatAccumulator = PID.BASE_SPD;
+float rightMotorFloatAccumulator = PID.BASE_SPD;
 
 // main loop
 void loop()
 {
-    unsigned long now = millis();
-    dt = (now - lastTime) / 1000.0;
-    if (dt <= 0)
-        dt = 0.001;
+    now = millis();
+    float dt = (now - lastTime) / 1000.0;
+    dt = (dt <= 0) ? 0.001 : dt;
     lastTime = now;
 
-    qtr.readCalibrated(sensorValues);
-
     // PID
-    position = calculatePosition(sensorValues, SENSOR_POS, SENSOR_COUNT);
+    qtr.readCalibrated(sensorValues);
+    float position = calculatePosition(sensorValues, SENSOR_POSITION_OFFSETS, SENSOR_COUNT);
     float error = position - PID.CENTER_POS;
 
     float P = PID.Kp * error;
@@ -67,15 +66,16 @@ void loop()
     lastError = error;
 
     float correction = P + D;
+    leftMotorFloatAccumulator -= correction;
+    rightMotorFloatAccumulator += correction;
 
-    int left = PID.BASE_SPD - correction;
-    int right = PID.BASE_SPD + correction;
+    int leftCorrection = constrain((int)leftMotorFloatAccumulator, 0, PID.MAX_SPD);
+    int rightCorrection = constrain((int)rightMotorFloatAccumulator, 0, PID.MAX_SPD);
 
-    left = constrain(left, 0, PID.MAX_SPD);
-    right = constrain(right, 0, PID.MAX_SPD);
+    // int leftCorrection = constrain(PID.BASE_SPD - correction, 0, PID.MAX_SPD);
+    // int rightCorrection = constrain(PID.BASE_SPD + correction, 0, PID.MAX_SPD);
 
-    // motorForward(MOTOR_A, right);
-    // motorForward(MOTOR_B, left);
-
-    // Serial.printf("Error: %.2f\tCorrection: %.2f\tTotal: %.2f\n", error, correction, total);
+    // apply motor
+    motorForward(motorController.LEFT_MOTOR, leftCorrection);
+    motorForward(motorController.RIGHT_MOTOR, rightCorrection);
 }

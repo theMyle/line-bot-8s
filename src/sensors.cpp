@@ -18,18 +18,17 @@ void calibrateSensors(QTRSensors &qtr)
 
 void calibrateSensorsFull(
     QTRSensors &qtr, int totalIterations = 200, int delayMs = 5,
-    const MotorPins &motorA, const MotorPins &motorB, const uint8_t motorSpeed)
+    const MotorController &motors, const uint8_t motorSpeed)
 {
     for (uint16_t i = 0; i < totalIterations; i++)
     {
         qtr.calibrate();
         bool reverse = i >= (totalIterations / 2);
-        motorSpinInPlace(motorA, motorB, motorSpeed, reverse);
+        moveSpinInPlace(motors, motorSpeed, reverse);
         delay(delayMs);
     }
 
-    motorStop(motorA);
-    motorStop(motorB);
+    stopMotors(motors);
 }
 
 float calculatePosition(uint16_t *sensorValues, float *sensorPos, uint8_t sensorCount)
