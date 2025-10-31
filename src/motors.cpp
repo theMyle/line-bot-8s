@@ -58,3 +58,17 @@ void motorResume(const uint8_t STBY)
 {
     digitalWrite(STBY, HIGH);
 }
+
+void motorSpinInPlace(const MotorPins &motorA, const MotorPins &motorB, const uint8_t speed, bool reverse = false)
+{
+    if (!reverse)
+    {
+        motorForward(motorA, speed);
+        motorBackward(motorB, speed);
+    }
+    else
+    {
+        motorForward(motorB, speed);
+        motorBackward(motorA, speed);
+    }
+}

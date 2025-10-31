@@ -27,17 +27,17 @@ PID_CONFIG PID{
 // setup things
 void setup()
 {
-    Serial.begin(115200);
-    delay(2000);
+    // Serial.begin(115200);
+    delay(3000);
 
     qtr.setTypeAnalog();
     qtr.setSensorPins(SENSOR_PINS, SENSOR_COUNT);
     qtr.releaseEmitterPins();
 
     initMotors(MOTOR_A, MOTOR_B, STBY);
-    calibrateSensors(qtr);
 
-    Serial.println("Ready. Reading values...");
+    // calibrateSensors(qtr);
+    calibrateSensorsFull(qtr, 400, 5, MOTOR_A, MOTOR_B, 80);
 }
 
 unsigned long lastTime = 0;

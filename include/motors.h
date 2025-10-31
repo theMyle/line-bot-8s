@@ -25,5 +25,6 @@ void motorBackward(const MotorPins &motor, const uint8_t speed);
 void motorStop(const MotorPins &motor);
 void motorCoast(const uint8_t STBY);
 void motorResume(const uint8_t STBY);
+void motorSpinInPlace(const MotorPins &motorA, const MotorPins &motorB, const uint8_t speed, bool reverse = false);
 
 #endif
